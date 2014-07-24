@@ -13,7 +13,8 @@
     "polymer",
     "web-components",
     "baasic",
-    "localstorage"
+    "article",
+    "document"
   ],
   "license": "MIT",
   "homepage": "https://github.com/monosoftware/baasic-article",
