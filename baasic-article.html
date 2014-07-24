@@ -1,0 +1,28 @@
+﻿<link rel="import" href="../baasic-ajax/baasic-ajax.html">
+<polymer-element name="baasic-article"  attributes="baseUrl version application slug">
+     <template>
+    <style>
+          :host { 
+              display: block;
+          }
+    </style>
+    {{response.content}}
+
+    <baasic-ajax
+    auto
+    url="{{baseUrl}}/{{version}}/{{application}}/article/{{slug}}/"
+    params='{"alt":"json", "embed":"Authors,Tags"}'
+    handleAs="json"
+    response="{{response}}"></baasic-ajax>
+
+    </template>
+    <script>
+        Polymer('baasic-article', {
+            baseUrl: "http://api.baasic.local",
+            version: "beta",
+            responseChanged: function (oldValue, newValue) {
+                //console.log(this.response);
+            }
+        });
+    </script>
+</polymer-element>

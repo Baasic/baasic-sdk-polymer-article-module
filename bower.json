@@ -1,0 +1,27 @@
+﻿{
+  "name": "baasic-article",
+  "version": "0.0.1",
+  "dependencies": {
+    "polymer": "Polymer/polymer#~0.3.3",
+    "baasic-ajax": "git://monosoftware/baasic-ajax.git#>=0.0.1"
+  },
+  "authors": [
+    "denis@mono-software.com"
+  ],
+  "description": "Baasic article Web component.",
+  "keywords": [
+    "polymer",
+    "web-components",
+    "baasic",
+    "localstorage"
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/monosoftware/baasic-article",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
