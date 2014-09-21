@@ -1,27 +1,61 @@
 ﻿<link rel="import" href="../baasic-ajax/baasic-ajax.html">
-<polymer-element name="baasic-article"  attributes="baseUrl version application slug">
-     <template>
-    <style>
-          :host { 
-              display: block;
-          }
-    </style>
-    {{response.content}}
-    
-    <baasic-ajax
-    auto
-    url="{{baseUrl}}/{{version}}/{{application}}/article/{{slug}}/"
-    params='{"alt":"json", "embed":"Authors,Tags"}'
-    handleAs="json"
-    response="{{response}}"></baasic-ajax>
+<link rel="import" href="../baasic-globals/baasic-globals.html">
+<link rel="import" href="../baasic-articleeditor/baasic-articleeditor.html">
+<link rel="import" href="../paper-input/paper-input.html">
+<link rel="import" href="../paper-dialog/paper-dialog.html">
+
+<polymer-element name="baasic-article" attributes="baseUrl version application slug">
+    <template>
+        <style>
+            :host {
+                display: block;
+            }
+
+            paper-dialog {
+                width: 80%;
+                min-width: 530px;
+            }
+        </style>
+        <div id="content"></div>
+        <template bind if="{{baasicUser.isAdmin}}">
+            <paper-dialog heading="Edit article" id="editDialog">
+                <baasic-articleeditor id="articleEditor" application="webcomponents" slug="{{slug}}" hideSaveButton="true" on-article-save="{{reload}}"></baasic-articleeditor>
+                <paper-button label="Close" dismissive></paper-button>
+                <paper-button label="Save" on-click="{{saveArticle}}" affirmative></paper-button>
+            </paper-dialog>
+            <paper-button label="Edit article" on-click="{{editDialog}}"></paper-button>
+        </template>
+        <baasic-globals id="globals"></baasic-globals>
+
+        <baasic-ajax id="ajax" auto
+                     url="{{baseUrl}}/{{version}}/{{application}}/article/{{slug}}/"
+                     params='{"embed":"Authors,Tags"}'
+                     handleas="json"
+                     contenttype="application/json"
+                     response="{{response}}"></baasic-ajax>
 
     </template>
+    <script src="../marked/lib/marked.js"></script>
     <script>
         Polymer('baasic-article', {
             baseUrl: "http://api.baasic.local",
             version: "beta",
+            ready: function () {
+                //pick up the user from the local storage
+                this.baasicUser = this.$.globals.baasicUser;
+            },
             responseChanged: function (oldValue, newValue) {
-                //console.log(this.response);
+                //parse the markdown of the article and display it
+                this.shadowRoot.getElementById('content').innerHTML = marked(newValue.content);
+            },
+            editDialog: function (e) {
+                this.shadowRoot.getElementById('editDialog').toggle();
+            },
+            saveArticle: function (e) {
+                this.shadowRoot.getElementById('articleEditor').saveChanges(e);
+            },
+            reload: function (e) {
+                this.shadowRoot.getElementById('content').innerHTML = marked(e.detail.content);
             }
         });
     </script>
