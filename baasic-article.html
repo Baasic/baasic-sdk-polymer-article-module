@@ -45,6 +45,7 @@
                 this.baasicUser = this.$.globals.baasicUser;
             },
             responseChanged: function (oldValue, newValue) {
+                console.log(newValue);
                 //parse the markdown of the article and display it
                 this.shadowRoot.getElementById('content').innerHTML = marked(newValue.content);
             },
