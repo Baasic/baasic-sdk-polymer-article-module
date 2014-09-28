@@ -3,6 +3,7 @@
 <link rel="import" href="../baasic-articleeditor/baasic-articleeditor.html">
 <link rel="import" href="../paper-input/paper-input.html">
 <link rel="import" href="../paper-dialog/paper-dialog.html">
+<link rel="import" href="../paper-button/paper-button.html">
 
 <polymer-element name="baasic-article" attributes="baseUrl version application slug">
     <template>
@@ -19,7 +20,7 @@
         <div id="content"></div>
         <template bind if="{{baasicUser.isAdmin}}">
             <paper-dialog heading="Edit article" id="editDialog">
-                <baasic-articleeditor id="articleEditor" application="webcomponents" slug="{{slug}}" hideSaveButton="true" on-article-save="{{reload}}"></baasic-articleeditor>
+                <baasic-articleeditor id="articleEditor" application="webcomponents" article="{{article}}" slug="{{slug}}" hideSaveButton="true" on-article-save="{{reload}}"></baasic-articleeditor>
                 <paper-button label="Close" dismissive></paper-button>
                 <paper-button label="Save" on-click="{{saveArticle}}" affirmative></paper-button>
             </paper-dialog>
@@ -32,25 +33,32 @@
                      params='{"embed":"Authors,Tags"}'
                      handleas="json"
                      contenttype="application/json"
-                     response="{{response}}"></baasic-ajax>
+                     response="{{response}}"
+                     on-core-error="{{onGetError}}"></baasic-ajax>
 
     </template>
     <script src="../marked/lib/marked.js"></script>
     <script>
         Polymer('baasic-article', {
-            baseUrl: "http://api.baasic.local",
-            version: "beta",
             ready: function () {
+                var globals = this.$.globals;
+                if (!this.baseUrl) this.baseUrl = globals.config.baseUrl;
+                if (!this.version) this.version = globals.config.version;
+                if (!this.application) this.application = globals.config.application;
                 //pick up the user from the local storage
                 this.baasicUser = this.$.globals.baasicUser;
             },
             responseChanged: function (oldValue, newValue) {
-                console.log(newValue);
+                this.article = newValue;
                 //parse the markdown of the article and display it
-                this.shadowRoot.getElementById('content').innerHTML = marked(newValue.content);
+                this.shadowRoot.getElementById('content').innerHTML = marked(this.article.content);
+            },
+            onGetError: function (e) {
+                console.log(e.detail.response);
             },
             editDialog: function (e) {
                 this.shadowRoot.getElementById('editDialog').toggle();
+                this.shadowRoot.getElementById('articleEditor').refresh();
             },
             saveArticle: function (e) {
                 this.shadowRoot.getElementById('articleEditor').saveChanges(e);
