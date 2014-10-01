@@ -1,9 +1,10 @@
-﻿<link rel="import" href="../baasic-ajax/baasic-ajax.html">
+<link rel="import" href="../baasic-ajax/baasic-ajax.html">
 <link rel="import" href="../baasic-globals/baasic-globals.html">
 <link rel="import" href="../baasic-articleeditor/baasic-articleeditor.html">
 <link rel="import" href="../paper-input/paper-input.html">
 <link rel="import" href="../paper-dialog/paper-dialog.html">
 <link rel="import" href="../paper-button/paper-button.html">
+<link rel="import" href="../core-signals/core-signals.html">
 
 <polymer-element name="baasic-article" attributes="baseUrl version application slug">
     <template>
@@ -35,26 +36,31 @@
                      contenttype="application/json"
                      response="{{response}}"
                      on-core-error="{{onGetError}}"></baasic-ajax>
-
+        <core-signals on-core-signal-user-login="{{loginChanged}}"></core-signals>
     </template>
     <script src="../marked/lib/marked.js"></script>
     <script>
         Polymer('baasic-article', {
             ready: function () {
-                var globals = this.$.globals;
-                if (!this.baseUrl) this.baseUrl = globals.config.baseUrl;
-                if (!this.version) this.version = globals.config.version;
-                if (!this.application) this.application = globals.config.application;
+                this.globals = this.$.globals;
+                if (!this.baseUrl) this.baseUrl = this.globals.config.baseUrl;
+                if (!this.version) this.version = this.globals.config.version;
+                if (!this.application) this.application = this.globals.config.application;
                 //pick up the user from the local storage
-                this.baasicUser = this.$.globals.baasicUser;
+                this.baasicUser = this.globals.baasicUser;
             },
             responseChanged: function (oldValue, newValue) {
                 this.article = newValue;
                 //parse the markdown of the article and display it
                 this.shadowRoot.getElementById('content').innerHTML = marked(this.article.content);
             },
+            loginChanged: function (data) {
+                this.baasicUser = this.globals.baasicUser;
+                this.$.ajax.go();
+                this.shadowRoot.getElementById('content').innerHTML = '';
+            },
             onGetError: function (e) {
-                console.log(e.detail.response);
+                console.log(e.detail);
             },
             editDialog: function (e) {
                 this.shadowRoot.getElementById('editDialog').toggle();
