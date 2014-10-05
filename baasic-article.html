@@ -46,7 +46,7 @@
                 if (!this.baseUrl) this.baseUrl = this.globals.config.baseUrl;
                 if (!this.version) this.version = this.globals.config.version;
                 if (!this.application) this.application = this.globals.config.application;
-                //pick up the user from the local storage
+                //pick up the user from cache
                 this.baasicUser = this.globals.baasicUser;
             },
             responseChanged: function (oldValue, newValue) {
