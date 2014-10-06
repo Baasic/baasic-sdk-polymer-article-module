@@ -6,7 +6,7 @@
 <link rel="import" href="../paper-button/paper-button.html">
 <link rel="import" href="../core-signals/core-signals.html">
 
-<polymer-element name="baasic-article" attributes="baseUrl version application slug">
+<polymer-element name="baasic-article" attributes="baseUrl version application slug sync">
     <template>
         <style>
             :host {
@@ -19,7 +19,7 @@
             }
         </style>
         <div id="content"></div>
-        <template bind if="{{baasicUser.isAdmin}}">
+        <template bind if="{{isAdmin}}">
             <paper-dialog heading="Edit article" id="editDialog">
                 <baasic-articleeditor id="articleEditor" application="webcomponents" article="{{article}}" slug="{{slug}}" hideSaveButton="true" on-article-save="{{reload}}"></baasic-articleeditor>
                 <paper-button label="Close" dismissive></paper-button>
@@ -29,7 +29,7 @@
         </template>
         <baasic-globals id="globals"></baasic-globals>
 
-        <baasic-ajax id="ajax" auto
+        <baasic-ajax id="ajax" 
                      url="{{baseUrl}}/{{version}}/{{application}}/article/{{slug}}/"
                      params='{"embed":"Authors,Tags"}'
                      handleas="json"
@@ -41,23 +41,35 @@
     <script src="../marked/lib/marked.js"></script>
     <script>
         Polymer('baasic-article', {
+            isAdmin: false,
+            sync: true,
             ready: function () {
+                
                 this.globals = this.$.globals;
                 if (!this.baseUrl) this.baseUrl = this.globals.config.baseUrl;
                 if (!this.version) this.version = this.globals.config.version;
                 if (!this.application) this.application = this.globals.config.application;
-                //pick up the user from cache
-                this.baasicUser = this.globals.baasicUser;
+                
+                this.ajaxAndRender();
+                
             },
             responseChanged: function (oldValue, newValue) {
-                this.article = newValue;
-                //parse the markdown of the article and display it
-                this.shadowRoot.getElementById('content').innerHTML = marked(this.article.content);
+                if (oldValue != newValue) {
+                    this.article = newValue;
+                    this.shadowRoot.getElementById('content').innerHTML = marked(this.article.content);
+                }
             },
             loginChanged: function (data) {
-                this.baasicUser = this.globals.baasicUser;
+                this.ajaxAndRender();
+            },
+            ajaxAndRender: function() {
+                this.isAdmin = this.globals.baasicUser.isAdmin;
+                //to allow to avoid FUOC and content jumping around when async loading is used
+                if (!this.isAdmin && this.sync)
+                    this.$.ajax.xhrArgs = { sync: true };
+                else
+                    this.$.ajax.xhrArgs = { sync: false };
                 this.$.ajax.go();
-                this.shadowRoot.getElementById('content').innerHTML = '';
             },
             onGetError: function (e) {
                 console.log(e.detail);
