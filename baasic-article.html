@@ -1,3 +1,26 @@
+<!--
+Copyright (c) 2014 Mono d.o.o. All rights reserved.
+Code distributed by Mono as a part of the Baasic project
+-->
+
+<!--
+@group Baasic Polymer Elements
+
+The `baasic-article` element provides displaying Baasic articles. It also includes an editor element that is shown to users in admin roles.
+
+    <baasic-article 
+        application="webcomponents" 
+        slug="test"
+        sync="true">
+    </baasic-article> 
+
+With `sync` set to `true`, the article element blocks the execution until the content is loaded. `baseUrl`, `version`, and `application` attributes can be set in the globals element for the whole application, and do not have to be set for each individual element.
+
+@element baasic-article
+@status beta
+@homepage www.baasic.com
+-->
+<link rel="import" href="../polymer/polymer.html">
 <link rel="import" href="../baasic-ajax/baasic-ajax.html">
 <link rel="import" href="../baasic-globals/baasic-globals.html">
 <link rel="import" href="../baasic-articleeditor/baasic-articleeditor.html">
@@ -41,17 +64,53 @@
     <script src="../marked/lib/marked.js"></script>
     <script>
         Polymer('baasic-article', {
-            isAdmin: false,
+            /**
+             * The URL target of the Baasic service. Can be used with baasic-globals element to set the property for all baasic elements in one place.
+             * 
+             * @attribute baseUrl
+             * @type string
+             * @default ''
+             */
+            baseUrl: '',
+            /**
+             * The versione Baasic service. Can be used with baasic-globals element to set the property for all baasic elements in one place.
+             * 
+             * @attribute version
+             * @type string
+             * @default ''
+             */
+            version: '',
+            /**
+             * The name of the Baasic application, unique per user. Can be used with baasic-globals element to set the property for all baasic elements in one place.
+             * 
+             * @attribute application
+             * @type string
+             * @default ''
+             */
+            application: '',
+            /**
+             * The slug of the article to display. If an article with this slug doesn't exists, it is created automatically.
+             * 
+             * @attribute slug
+             * @type string
+             * @default ''
+             */
+            slug: '',
+            /**
+             * Indicator of the syhronous/asynchronous load mode. Set to true if you want to load articles in sync mode, which blocks execution until the content is loaded.
+             * 
+             * @attribute sync
+             * @type boolean
+             * @default ''
+             */
             sync: true,
+            isAdmin: false,
             ready: function () {
-                
                 this.globals = this.$.globals;
                 if (!this.baseUrl) this.baseUrl = this.globals.config.baseUrl;
                 if (!this.version) this.version = this.globals.config.version;
                 if (!this.application) this.application = this.globals.config.application;
-                
-                this.ajaxAndRender();
-                
+                this.fetchData();
             },
             responseChanged: function (oldValue, newValue) {
                 if (oldValue != newValue) {
@@ -60,11 +119,10 @@
                 }
             },
             loginChanged: function (data) {
-                this.ajaxAndRender();
+                this.fetchData();
             },
-            ajaxAndRender: function() {
+            fetchData: function () {
                 this.isAdmin = this.globals.baasicUser.isAdmin;
-                //to allow to avoid FUOC and content jumping around when async loading is used
                 if (!this.isAdmin && this.sync)
                     this.$.ajax.xhrArgs = { sync: true };
                 else
@@ -72,7 +130,7 @@
                 this.$.ajax.go();
             },
             onGetError: function (e) {
-                console.log(e.detail);
+                this.shadowRoot.getElementById('content').innerHTML = '';
             },
             editDialog: function (e) {
                 this.shadowRoot.getElementById('editDialog').toggle();
