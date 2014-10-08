@@ -101,9 +101,9 @@ With `sync` set to `true`, the article element blocks the execution until the co
              * 
              * @attribute sync
              * @type boolean
-             * @default ''
+             * @default false
              */
-            sync: true,
+            sync: false,
             isAdmin: false,
             ready: function () {
                 this.globals = this.$.globals;
@@ -113,9 +113,9 @@ With `sync` set to `true`, the article element blocks the execution until the co
                 this.fetchData();
             },
             responseChanged: function (oldValue, newValue) {
-                if (oldValue != newValue) {
+                if (newValue != null && oldValue != newValue) {
                     this.article = newValue;
-                    this.shadowRoot.getElementById('content').innerHTML = marked(this.article.content);
+                    this.$.content.innerHTML = marked(this.article.content);
                 }
             },
             loginChanged: function (data) {
