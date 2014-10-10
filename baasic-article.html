@@ -130,7 +130,6 @@ With `sync` set to `true`, the article element blocks the execution until the co
                 this.$.ajax.go();
             },
             onGetError: function (e) {
-                console.log(e);
                 this.shadowRoot.getElementById('content').innerHTML = '';
             },
             editDialog: function (e) {
