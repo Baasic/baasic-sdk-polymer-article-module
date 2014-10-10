@@ -45,10 +45,10 @@ With `sync` set to `true`, the article element blocks the execution until the co
         <template bind if="{{isAdmin}}">
             <paper-dialog heading="Edit article" id="editDialog">
                 <baasic-articleeditor id="articleEditor" application="webcomponents" article="{{article}}" slug="{{slug}}" hideSaveButton="true" on-article-save="{{reload}}"></baasic-articleeditor>
-                <paper-button label="Close" dismissive></paper-button>
-                <paper-button label="Save" on-click="{{saveArticle}}" affirmative></paper-button>
+                <paper-button dismissive>Close</paper-button>
+                <paper-button on-click="{{saveArticle}}" affirmative>Save</paper-button>
             </paper-dialog>
-            <paper-button label="Edit article" on-click="{{editDialog}}"></paper-button>
+            <paper-button on-click="{{editDialog}}">Edit article</paper-button>
         </template>
         <baasic-globals id="globals"></baasic-globals>
 
@@ -130,6 +130,7 @@ With `sync` set to `true`, the article element blocks the execution until the co
                 this.$.ajax.go();
             },
             onGetError: function (e) {
+                console.log(e);
                 this.shadowRoot.getElementById('content').innerHTML = '';
             },
             editDialog: function (e) {
