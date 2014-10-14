@@ -25,9 +25,12 @@ With `sync` set to `true`, the article element blocks the execution until the co
 <link rel="import" href="../baasic-globals/baasic-globals.html">
 <link rel="import" href="../baasic-articleeditor/baasic-articleeditor.html">
 <link rel="import" href="../paper-input/paper-input.html">
+<link rel="import" href="../paper-dialog/paper-dialog-transition.html">
 <link rel="import" href="../paper-dialog/paper-dialog.html">
 <link rel="import" href="../paper-button/paper-button.html">
 <link rel="import" href="../core-signals/core-signals.html">
+<link rel="import" href="../core-overlay/core-overlay.html">
+<link rel="import" href="../core-collapse/core-collapse.html">
 
 <polymer-element name="baasic-article" attributes="baseUrl version application slug sync">
     <template>
@@ -35,30 +38,36 @@ With `sync` set to `true`, the article element blocks the execution until the co
             :host {
                 display: block;
             }
-
-            paper-dialog {
-                width: 80%;
-                min-width: 530px;
+            .article.editor {
+                background: #fff;
+                padding: 30px;
+            }
+            .article.footer {
+                background: #f5f5f5;
+                padding: 20px 30px 20px 30px;
             }
         </style>
         <div id="content"></div>
         <template bind if="{{isAdmin}}">
-            <paper-dialog heading="Edit article" id="editDialog">
-                <baasic-articleeditor id="articleEditor" application="webcomponents" article="{{article}}" slug="{{slug}}" hideSaveButton="true" on-article-save="{{reload}}"></baasic-articleeditor>
-                <paper-button dismissive>Close</paper-button>
-                <paper-button on-click="{{saveArticle}}" affirmative>Save</paper-button>
-            </paper-dialog>
-            <paper-button on-click="{{editDialog}}">Edit article</paper-button>
+            <paper-button on-click="{{toggle}}">Edit article</paper-button>
+            <core-collapse id="collapse">
+                <div class="[ article editor ]">
+                    <baasic-articleeditor id="articleEditor" application="webcomponents" article="{{article}}" slug="{{slug}}" hideSaveButton="true" on-article-save="{{reload}}"></baasic-articleeditor>
+                </div>
+                <div class="[ article ] [ footer ]">
+                    <paper-button on-click="{{saveArticle}} {{toggle}}" affirmative>Save</paper-button>
+                </div>
+            </core-collapse>
         </template>
         <baasic-globals id="globals"></baasic-globals>
 
         <baasic-ajax id="ajax" 
-                     url="{{baseUrl}}/{{version}}/{{application}}/article/{{slug}}/"
-                     params='{"embed":"Authors,Tags"}'
-                     handleas="json"
-                     contenttype="application/json"
-                     response="{{response}}"
-                     on-core-error="{{onGetError}}"></baasic-ajax>
+            url="{{baseUrl}}/{{version}}/{{application}}/article/{{slug}}/"
+            params='{"embed":"Authors,Tags"}'
+            handleas="json"
+            contenttype="application/json"
+            response="{{response}}"
+            on-core-error="{{onGetError}}"></baasic-ajax>
         <core-signals on-core-signal-user-login="{{loginChanged}}"></core-signals>
     </template>
     <script src="../marked/lib/marked.js"></script>
@@ -118,6 +127,10 @@ With `sync` set to `true`, the article element blocks the execution until the co
                     this.$.content.innerHTML = marked(this.article.content);
                 }
             },
+            toggle: function() {
+                this.shadowRoot.getElementById('collapse').toggle();
+                this.shadowRoot.getElementById('articleEditor').refresh();
+            },
             loginChanged: function (data) {
                 this.fetchData();
             },
@@ -131,10 +144,6 @@ With `sync` set to `true`, the article element blocks the execution until the co
             },
             onGetError: function (e) {
                 this.shadowRoot.getElementById('content').innerHTML = '';
-            },
-            editDialog: function (e) {
-                this.shadowRoot.getElementById('editDialog').toggle();
-                this.shadowRoot.getElementById('articleEditor').refresh();
             },
             saveArticle: function (e) {
                 this.shadowRoot.getElementById('articleEditor').saveChanges(e);

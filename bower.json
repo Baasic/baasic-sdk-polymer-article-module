@@ -6,6 +6,7 @@
     "paper-input": "Polymer/paper-input#>=0.4.2",
     "paper-dialog": "Polymer/paper-dialog#>=0.4.2",
     "core-signals": "Polymer/core-signals#>=0.4.2",
+    "core-collapse": "Polymer/core-collapse#>=0.4.2",
     "baasic-globals": "http://gitserver/monosoftware/baasic-sdk-polymer-core-globals.git#>=0.0.1",
     "baasic-articleeditor": "http://gitserver/monosoftware/baasic-sdk-polymer-article-editor.git#>=0.0.1",
     "baasic-ajax": "http://gitserver/monosoftware/baasic-sdk-polymer-core-ajax.git#>=0.0.1"
