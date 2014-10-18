@@ -7,13 +7,10 @@
     "paper-dialog": "Polymer/paper-dialog#>=0.4.2",
     "core-signals": "Polymer/core-signals#>=0.4.2",
     "core-collapse": "Polymer/core-collapse#>=0.4.2",
-    "baasic-globals": "http://gitserver/monosoftware/baasic-sdk-polymer-core-globals.git#>=0.0.1",
-    "baasic-articleeditor": "http://gitserver/monosoftware/baasic-sdk-polymer-article-editor.git#>=0.0.1",
-    "baasic-ajax": "http://gitserver/monosoftware/baasic-sdk-polymer-core-ajax.git#>=0.0.1"
+    "baasic-globals":  "Baasic/baasic-sdk-polymer-core-globals#>=0.1.0",
+    "baasic-articleeditor":  "Baasic/baasic-sdk-polymer-article-editor#>=0.1.0",
+    "baasic-ajax": "Baasic/baasic-sdk-polymer-core-ajax#>=0.1.0"
   },
-  "authors": [
-    "denis@mono-software.com"
-  ],
   "description": "Baasic article Web component.",
   "keywords": [
     "polymer",
@@ -23,7 +20,7 @@
     "document"
   ],
   "license": "MIT",
-  "homepage": "https://github.com/monosoftware/baasic-article",
+  "homepage": "https://github.com/baasic/baasic-sdk-polymer-article-module",
   "ignore": [
     "**/.*",
     "node_modules",
