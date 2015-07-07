@@ -1,156 +1,135 @@
 <!--
-Copyright (c) 2014 Mono d.o.o. All rights reserved.
-Code distributed by Mono as a part of the Baasic project
--->
-
-<!--
-@group Baasic Polymer Elements
-
-The `baasic-article` element provides displaying Baasic articles. It also includes an editor element that is shown to users in admin roles.
-
-    <baasic-article 
-        application="webcomponents" 
-        slug="test">
-    </baasic-article> 
-
-With `sync` set to `true`, the article element blocks the execution until the content is loaded. `baseUrl`, `version`, and `application` attributes can be set in the globals element for the whole application, and do not have to be set for each individual element.
-
-@element baasic-article
-@status beta
-@homepage www.baasic.com
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
 -->
 <link rel="import" href="../polymer/polymer.html">
-<link rel="import" href="../baasic-ajax/baasic-ajax.html">
-<link rel="import" href="../baasic-globals/baasic-globals.html">
+<link rel="import" href="../baasic-globals/globals-import.html">
+<link rel="import" href="../baasic-globals/config.html">
+<link rel="import" href="../baasic-globals/baasic-ajax.html">
 <link rel="import" href="../baasic-articleeditor/baasic-articleeditor.html">
-<link rel="import" href="../paper-input/paper-input.html">
-<link rel="import" href="../paper-dialog/paper-dialog-transition.html">
 <link rel="import" href="../paper-dialog/paper-dialog.html">
+<link rel="import" href="../paper-dialog-behavior/paper-dialog-behavior.html">
 <link rel="import" href="../paper-button/paper-button.html">
-<link rel="import" href="../core-signals/core-signals.html">
-<link rel="import" href="../core-overlay/core-overlay.html">
-<link rel="import" href="../core-collapse/core-collapse.html">
+<link rel="import" href="../iron-signals/iron-signals.html">
+<link rel="import" href="../iron-collapse/iron-collapse.html">
+<link rel="import" href="../iron-overlay-behavior/iron-overlay-behavior.html">
 
-<polymer-element name="baasic-article" attributes="baseUrl version application slug sync">
+<!--
+An element providing a solution to no problem in particular.
+
+Example:
+
+    <baasic-article></baasic-article>
+
+@demo
+-->
+<dom-module id="baasic-article">
+    <style>
+        :host {
+            display: block;
+        }
+
+        .article.editor {
+            background: #fff;
+            padding: 30px;
+        }
+
+        .article.footer {
+            background: #f5f5f5;
+            padding: 20px 30px 20px 30px;
+        }
+    </style>
     <template>
-        <style>
-            :host {
-                display: block;
-            }
-            .article.editor {
-                background: #fff;
-                padding: 30px;
-            }
-            .article.footer {
-                background: #f5f5f5;
-                padding: 20px 30px 20px 30px;
-            }
-        </style>
         <div id="content"></div>
-        <template bind if="{{isAdmin}}">
-            <paper-button on-click="{{toggle}}" class="colored">Edit article</paper-button>
-            <core-collapse id="collapse">
+        <template is="dom-if" id="editorContainer" if="{{isAdmin}}">
+            <paper-button on-click="toggle" class="colored">Edit article</paper-button>
+            <iron-collapse id="collapse">
                 <div class="[ article editor ]">
-                    <baasic-articleeditor id="articleEditor" application="webcomponents" article="{{article}}" slug="{{slug}}" hideSaveButton="true" on-article-save="{{reload}}"></baasic-articleeditor>
+                    <baasic-articleeditor id="articleEditor" auto article="{{article}}" slug="{{slug}}" hidesavebutton="true" on-article-save="reload"></baasic-articleeditor>
                 </div>
                 <div class="[ article ] [ footer ]">
-                    <paper-button on-click="{{saveArticle}}" affirmative class="colored">Save</paper-button>
-                    <paper-button on-click="{{toggle}}">Close</paper-button>
+                    <paper-button on-click="saveArticle" affirmative class="colored">Save</paper-button>
+                    <paper-button on-click="toggle">Close</paper-button>
                 </div>
-            </core-collapse>
+            </iron-collapse>
         </template>
-        <baasic-globals id="globals"></baasic-globals>
-
-        <baasic-ajax id="ajax" 
-            url="{{baseUrl}}/{{version}}/{{application}}/articles/{{slug}}/"
-            params='{"embed":"Authors,Tags"}'
-            handleas="json"
-            contenttype="application/json"
-            response="{{response}}"
-            on-core-error="{{onGetError}}"></baasic-ajax>
-        <core-signals on-core-signal-user-login="{{loginChanged}}"></core-signals>
+        <iron-signals on-iron-signal-user-login="loginChanged"></iron-signals>
     </template>
     <script src="../marked/lib/marked.js"></script>
-    <script>
-        Polymer('baasic-article', {
+</dom-module>
+<script>
+
+    Polymer({
+
+        is: 'baasic-article',
+        behaviors: [Baasic.Ajax, Baasic.Config],
+        properties: {
             /**
-             * The URL target of the Baasic service. Can be used with baasic-globals element to set the property for all baasic elements in one place.
-             * 
-             * @attribute baseUrl
-             * @type string
-             * @default ''
-             */
-            baseUrl: '',
-            /**
-             * The versione Baasic service. Can be used with baasic-globals element to set the property for all baasic elements in one place.
-             * 
-             * @attribute version
-             * @type string
-             * @default ''
-             */
-            version: '',
-            /**
-             * The name of the Baasic application, unique per user. Can be used with baasic-globals element to set the property for all baasic elements in one place.
-             * 
-             * @attribute application
-             * @type string
-             * @default ''
-             */
-            application: '',
-            /**
-             * The slug of the article to display. If an article with this slug doesn't exists, it is created automatically.
-             * 
-             * @attribute slug
-             * @type string
-             * @default ''
-             */
-            slug: '',
-            /**
-             * Indicator of the syhronous/asynchronous load mode. Set to true if you want to load articles in sync mode, which blocks execution until the content is loaded.
-             * 
-             * @attribute sync
-             * @type boolean
-             * @default false
-             */
-            sync: false,
-            isAdmin: false,
-            ready: function () {
-                this.globals = this.$.globals;
-                if (!this.baseUrl) this.baseUrl = this.globals.config.baseUrl;
-                if (!this.version) this.version = this.globals.config.version;
-                if (!this.application) this.application = this.globals.config.application;
-                this.fetchData();
+            * The slug of the article to display. If an article with this slug doesn't exists, it is created automatically.
+            *
+            * @attribute slug
+            * @type string
+            * @default ''
+            */
+            slug: {
+                type: String,
+                value: '',
+                notify: true
             },
-            responseChanged: function (oldValue, newValue) {
-                if (newValue != null && oldValue != newValue) {
-                    this.article = newValue;
-                    this.$.content.innerHTML = marked(this.article.content);
-                }
-            },
-            toggle: function() {
-                this.shadowRoot.getElementById('collapse').toggle();
-                this.shadowRoot.getElementById('articleEditor').refresh();
-            },
-            loginChanged: function (data) {
-                this.fetchData();
-            },
-            fetchData: function () {
-                this.isAdmin = this.globals.baasicUser.isAdmin;
-                if (!this.isAdmin && this.sync)
-                    this.$.ajax.xhrArgs = { sync: true };
-                else
-                    this.$.ajax.xhrArgs = { sync: false };
-                this.$.ajax.go();
-            },
-            onGetError: function (e) {
-                this.shadowRoot.getElementById('content').innerHTML = '';
-            },
-            saveArticle: function (e) {
-                this.shadowRoot.getElementById('articleEditor').saveChanges(e);
-            },
-            reload: function (e) {
-                this.shadowRoot.getElementById('content').innerHTML = marked(e.detail.content);
+            isAdmin: {
+                type: Boolean,
+                value: false,
+                notify: true
             }
-        });
-    </script>
-</polymer-element>
+
+        },
+
+        // Element Lifecycle
+
+        ready: function () {
+            this.fetchData();
+        },
+        getBaasicUser: function () {
+            return Baasic.Cache.getItem('baasicUser') || {};
+        },
+        fetchData: function () {
+            this.isAdmin = this.getBaasicUser().isAdmin;
+            Baasic.Ajax.go(String.format('{0}/{1}/{2}/articles/{3}/?embed=Author,Tags', this.baseUrl, this.version, this.application, this.slug))
+                .then(this.handleGetCompleted.bind(this))
+                .catch(this.handleGetError.bind(this));
+        },
+        handleGetCompleted: function (e) {
+            this.article = e;
+            this.$.content.innerHTML = marked(this.article.content);
+        },
+        handleGetError: function (e) {
+            console.log(e);
+            this.article = null;
+            console.log('Error fetching article ' + e);
+        },
+        toggle: function () {
+            //var c = Polymer.dom(this.root).querySelector('#collapse');
+            //c.toggle();
+            //Polymer.dom(this.root).querySelector('#articleEditor').refresh();
+            this.$$('#collapse').toggle();
+            this.$$('#articleEditor').refresh();
+        },
+        loginChanged: function (data) {
+            this.fetchData();
+        },
+        saveArticle: function (e) {
+            this.$$('#articleEditor').saveChanges(e);
+        },
+        reload: function (e) {
+            this.$.content.innerHTML = marked(e.detail.content);
+        }
+        
+
+    });
+
+</script>

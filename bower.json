@@ -1,31 +1,29 @@
 {
   "name": "baasic-article",
-  "dependencies": {
-    "polymer": "Polymer/polymer#>=0.4.2",
-    "paper-button": "Polymer/paper-button#>=0.4.2",
-    "paper-input": "Polymer/paper-input#>=0.4.2",
-    "paper-dialog": "Polymer/paper-dialog#>=0.4.2",
-    "core-signals": "Polymer/core-signals#>=0.4.2",
-    "core-collapse": "Polymer/core-collapse#>=0.4.2",
-    "baasic-globals":  "Baasic/baasic-sdk-polymer-core-globals#>=0.1.0",
-    "baasic-articleeditor":  "Baasic/baasic-sdk-polymer-article-editor#>=0.1.0",
-    "baasic-ajax": "Baasic/baasic-sdk-polymer-core-ajax#>=0.1.0"
-  },
-  "description": "Baasic article Web component.",
-  "keywords": [
-    "polymer",
-    "web-components",
-    "baasic",
-    "article",
-    "document"
+  "version": "1.0.0",
+  "authors": [
+    "Anonymous <anonymous@example.com>"
   ],
-  "license": "MIT",
-  "homepage": "https://github.com/baasic/baasic-sdk-polymer-article-module",
+  "description": "An element providing a solution to no problem in particular.",
+  "keywords": [
+    "web-component",
+    "web-components",
+    "polymer",
+    "seed"
+  ],
+  "main": "baasic-article.html",
+  "license": "http://polymer.github.io/LICENSE.txt",
+  "homepage": "https://github.com/<USERNAME>/seed-element/",
   "ignore": [
-    "**/.*",
-    "node_modules",
-    "bower_components",
-    "test",
-    "tests"
-  ]
+    "/.*",
+    "/test/",
+    "/demo/"
+  ],
+  "dependencies": {
+    "polymer": "Polymer/polymer#^1.0.0"
+  },
+  "devDependencies": {
+    "iron-component-page": "PolymerElements/iron-component-page#^1.0.0",
+    "web-component-tester": "*"
+  }
 }
