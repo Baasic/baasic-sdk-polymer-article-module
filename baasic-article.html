@@ -20,13 +20,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../iron-overlay-behavior/iron-overlay-behavior.html">
 
 <!--
-An element providing a solution to no problem in particular.
+The `baasic-article` element provides means for displaying Baasic articles. It also includes an editor element that is shown to users in admin roles.
 
-Example:
+    <baasic-article 
+        application="webcomponents" 
+        slug="test">
+    </baasic-article> 
+`baseUrl`, `version`, and `application` attributes can be set in the globals element for the whole application, and do not have to be set for each individual element.
 
-    <baasic-article></baasic-article>
-
+@element baasic-article
+@group Baasic Polymer Elements
 @demo
+@homepage www.baasic.com
 -->
 <dom-module id="baasic-article">
     <style>
@@ -71,60 +76,76 @@ Example:
         properties: {
             /**
             * The slug of the article to display. If an article with this slug doesn't exists, it is created automatically.
-            *
-            * @attribute slug
-            * @type string
-            * @default ''
             */
             slug: {
                 type: String,
                 value: '',
                 notify: true
             },
+            /**
+            * Indicates if admin section should be shown, including the article editor and associated buttons.
+            */
             isAdmin: {
                 type: Boolean,
                 value: false,
                 notify: true
             }
-
         },
-
-        // Element Lifecycle
-
         ready: function () {
             this.fetchData();
         },
-        getBaasicUser: function () {
+        /**
+        * Gets the user data from the cache.
+        */
+        _getBaasicUser: function () {
             return Baasic.Cache.getItem('baasicUser') || {};
         },
+        /**
+        * Fetches the article from the Baasic REST endpoint.
+        */
         fetchData: function () {
-            this.isAdmin = this.getBaasicUser().isAdmin;
+            this.isAdmin = this._getBaasicUser().isAdmin;
             Baasic.Ajax.go(String.format('{0}/{1}/{2}/articles/{3}/?embed=Author,Tags', this.baseUrl, this.version, this.application, this.slug))
-                .then(this.handleGetCompleted.bind(this))
-                .catch(this.handleGetError.bind(this));
+                .then(this._handleGetCompleted.bind(this))
+                .catch(this._handleGetError.bind(this));
         },
-        handleGetCompleted: function (e) {
+        /**
+        * Displays the article in the element after it is fetched from the server.
+        */
+        _handleGetCompleted: function (e) {
             this.article = e;
             this.$.content.innerHTML = marked(this.article.content);
         },
-        handleGetError: function (e) {
-            console.log(e);
+        /**
+        * Handles the error that occured while fetching the article.
+        */
+        _handleGetError: function (e) {
             this.article = null;
             console.log('Error fetching article ' + e);
         },
+        /**
+        * Toggles the visibility of the article editor.
+        */
         toggle: function () {
-            //var c = Polymer.dom(this.root).querySelector('#collapse');
-            //c.toggle();
-            //Polymer.dom(this.root).querySelector('#articleEditor').refresh();
+            //Polymer.dom(this.root).querySelector('#collapse').toggle();
             this.$$('#collapse').toggle();
             this.$$('#articleEditor').refresh();
         },
+        /**
+        * Re-fetches the article if the user's login status changes.
+        */
         loginChanged: function (data) {
             this.fetchData();
         },
+        /**
+        * Saves the changes made in the article editor by calling its saveChanges method.
+        */
         saveArticle: function (e) {
             this.$$('#articleEditor').saveChanges(e);
         },
+        /**
+        * Reloads the article displayed in the element.
+        */
         reload: function (e) {
             this.$.content.innerHTML = marked(e.detail.content);
         }
