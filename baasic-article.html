@@ -87,6 +87,7 @@ The `baasic-article` element provides means for displaying Baasic articles. It a
             */
             isAdmin: {
                 type: Boolean,
+                readOnly: true,
                 value: false,
                 notify: true
             }
@@ -104,7 +105,7 @@ The `baasic-article` element provides means for displaying Baasic articles. It a
         * Fetches the article from the Baasic REST endpoint.
         */
         fetchData: function () {
-            this.isAdmin = this._getBaasicUser().isAdmin;
+            this._setIsAdmin(this._getBaasicUser().isAdmin);
             Baasic.Ajax.go(String.format('{0}/{1}/{2}/articles/{3}/?embed=Author,Tags', this.baseUrl, this.version, this.application, this.slug))
                 .then(this._handleGetCompleted.bind(this))
                 .catch(this._handleGetError.bind(this));
